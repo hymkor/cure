@@ -1,10 +1,11 @@
 package main
 
 import "bufio"
+import "fmt"
 import "io"
 import "os"
 import "regexp"
-import "fmt"
+import "strings"
 
 import "github.com/zetamatta/nyagos/Src/conio"
 import "github.com/shiena/ansicolor"
@@ -20,7 +21,9 @@ func cat1(r io.Reader) bool {
 	scanner := bufio.NewScanner(r)
 	count := 0
 	for scanner.Scan() {
-		width := conio.GetStringWidth(ansiStrip.ReplaceAllString(scanner.Text(), ""))
+		text := scanner.Text()
+		text = strings.Replace(text, "\uFEFF", "", 1)
+		width := conio.GetStringWidth(ansiStrip.ReplaceAllString(text, ""))
 		lines := (width + screenWidth) / screenWidth
 		for count+lines > screenHeight {
 			fmt.Print("more>")
@@ -37,7 +40,7 @@ func cat1(r io.Reader) bool {
 		if bold {
 			fmt.Fprint(ansiOut, "\x1B[1m")
 		}
-		fmt.Fprintln(ansiOut, scanner.Text())
+		fmt.Fprintln(ansiOut, text)
 		count += lines
 	}
 	return true
