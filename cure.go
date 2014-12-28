@@ -6,7 +6,7 @@ import "os"
 import "regexp"
 import "fmt"
 
-import "github.com/zetamatta/nyagos/conio"
+import "github.com/zetamatta/nyagos/Src/conio"
 import "github.com/shiena/ansicolor"
 
 var ansiStrip = regexp.MustCompile("\x1B[^a-zA-Z]*[A-Za-z]")
@@ -45,7 +45,7 @@ func cat1(r io.Reader) bool {
 
 func main() {
 	count := 0
-	screenWidth, screenHeight = conio.GetScreenSize()
+	screenWidth, screenHeight = conio.GetScreenBufferInfo().ViewSize()
 	for _, arg1 := range os.Args[1:] {
 		if arg1 == "-b" {
 			bold = true
