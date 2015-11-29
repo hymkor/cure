@@ -1,5 +1,11 @@
 ### CURE.exe - Color-Unicoded moRE.exe
 
+Text Viewer
+
+- Running on Windows-Command-Prompt.
+- Support UTF8 text
+- Support ANSI Escape Sequences.
+
 ## Usage
 
     CURE.exe [-b] {filename(s)}
