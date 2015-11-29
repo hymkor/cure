@@ -7,7 +7,7 @@ import "os"
 import "regexp"
 import "strings"
 
-import "github.com/zetamatta/nyagos/Src/conio"
+import "github.com/zetamatta/nyagos/conio"
 import "github.com/shiena/ansicolor"
 
 var ansiStrip = regexp.MustCompile("\x1B[^a-zA-Z]*[A-Za-z]")
