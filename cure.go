@@ -22,7 +22,7 @@ func cat1(r io.Reader) bool {
 	count := 0
 	for scanner.Scan() {
 		text := scanner.Text()
-		text = strings.Replace(text, "\uFEFF", "", 1)
+		text = strings.Replace(text, "\xEF\xBB\xBF", "", 1)
 		width := conio.GetStringWidth(ansiStrip.ReplaceAllString(text, ""))
 		lines := (width + screenWidth) / screenWidth
 		for count+lines > screenHeight {
