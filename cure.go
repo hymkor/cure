@@ -25,7 +25,7 @@ func cat1(r io.Reader) bool {
 		text = strings.Replace(text, "\xEF\xBB\xBF", "", 1)
 		width := conio.GetStringWidth(ansiStrip.ReplaceAllString(text, ""))
 		lines := (width + screenWidth) / screenWidth
-		for count+lines > screenHeight {
+		for count+lines >= screenHeight {
 			fmt.Print("more>")
 			ch := conio.GetCh()
 			fmt.Print("\r     \b\b\b\b\b")
