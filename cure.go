@@ -26,9 +26,9 @@ func cat1(r io.Reader) bool {
 		width := conio.GetStringWidth(ansiStrip.ReplaceAllString(text, ""))
 		lines := (width + screenWidth) / screenWidth
 		for count+lines >= screenHeight {
-			fmt.Print("more>")
+			fmt.Fprint(os.Stderr, "more>")
 			ch := conio.GetCh()
-			fmt.Print("\r     \b\b\b\b\b")
+			fmt.Fprint(os.Stderr, "\r     \b\b\b\b\b")
 			if ch == 'q' {
 				return false
 			} else if ch == '\r' {
