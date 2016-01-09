@@ -3,7 +3,10 @@
 if not "%1" == "" goto %1
 
 :build
+    setlocal
+    set GOARCH=386
     go build
+    endlocal
     goto end
 :get
     for %%I in (github.com/mattn/go-runewidth github.com/shiena/ansicolor github.com/zetamatta/nyagos/conio) do ( go get %%I & cd %GOPATH%\src\%%I & git pull origin master)
