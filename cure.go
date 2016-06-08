@@ -1,14 +1,17 @@
 package main
 
-import "bufio"
-import "fmt"
-import "io"
-import "os"
-import "regexp"
-import "strings"
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"os"
+	"regexp"
+	"strings"
 
-import "github.com/zetamatta/nyagos/conio"
-import "github.com/shiena/ansicolor"
+	"github.com/shiena/ansicolor"
+	"github.com/zetamatta/go-getch"
+	"github.com/zetamatta/nyagos/conio"
+)
 
 var ansiStrip = regexp.MustCompile("\x1B[^a-zA-Z]*[A-Za-z]")
 var ansiOut = ansicolor.NewAnsiColorWriter(os.Stdout)
@@ -27,7 +30,7 @@ func cat1(r io.Reader) bool {
 		lines := (width + screenWidth) / screenWidth
 		for count+lines >= screenHeight {
 			fmt.Fprint(os.Stderr, "more>")
-			ch := conio.GetCh()
+			ch := getch.Rune()
 			fmt.Fprint(os.Stderr, "\r     \b\b\b\b\b")
 			if ch == 'q' {
 				return false

@@ -9,7 +9,7 @@ if not "%1" == "" goto %1
     endlocal
     goto end
 :get
-    for %%I in (github.com/mattn/go-runewidth github.com/shiena/ansicolor github.com/zetamatta/nyagos/conio) do ( go get %%I & cd %GOPATH%\src\%%I & git pull origin master)
+    for %%I in (github.com/mattn/go-runewidth github.com/shiena/ansicolor github.com/zetamatta/nyagos/conio github.com/zetamatta/go-getch) do ( go get %%I & cd %GOPATH%\src\%%I & git pull origin master)
     goto end
 :fmt
     go fmt
