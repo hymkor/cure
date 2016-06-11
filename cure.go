@@ -8,13 +8,13 @@ import (
 	"regexp"
 	"strings"
 	"github.com/mattn/go-runewidth"
-	"github.com/shiena/ansicolor"
+	"github.com/mattn/go-colorable"
 	"github.com/zetamatta/go-getch"
 	"github.com/zetamatta/nyagos/conio"
 )
 
 var ansiStrip = regexp.MustCompile("\x1B[^a-zA-Z]*[A-Za-z]")
-var ansiOut = ansicolor.NewAnsiColorWriter(os.Stdout)
+var ansiOut = colorable.NewColorableStdout()
 
 var bold = false
 var screenWidth int
