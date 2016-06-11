@@ -7,7 +7,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
+	"github.com/mattn/go-runewidth"
 	"github.com/shiena/ansicolor"
 	"github.com/zetamatta/go-getch"
 	"github.com/zetamatta/nyagos/conio"
@@ -26,7 +26,7 @@ func cat1(r io.Reader) bool {
 	for scanner.Scan() {
 		text := scanner.Text()
 		text = strings.Replace(text, "\xEF\xBB\xBF", "", 1)
-		width := conio.GetStringWidth(ansiStrip.ReplaceAllString(text, ""))
+		width := runewidth.StringWidth(ansiStrip.ReplaceAllString(text, ""))
 		lines := (width + screenWidth) / screenWidth
 		for count+lines >= screenHeight {
 			fmt.Fprint(os.Stderr, "more>")
