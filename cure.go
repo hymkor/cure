@@ -10,7 +10,7 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/mattn/go-colorable"
 	"github.com/zetamatta/go-getch"
-	"github.com/zetamatta/nyagos/conio"
+	"github.com/zetamatta/go-box"
 )
 
 var ansiStrip = regexp.MustCompile("\x1B[^a-zA-Z]*[A-Za-z]")
@@ -51,7 +51,7 @@ func cat1(r io.Reader) bool {
 
 func main() {
 	count := 0
-	screenWidth, screenHeight = conio.GetScreenBufferInfo().ViewSize()
+	screenWidth, screenHeight = box.GetScreenBufferInfo().ViewSize()
 	for _, arg1 := range os.Args[1:] {
 		if arg1 == "-b" {
 			bold = true
