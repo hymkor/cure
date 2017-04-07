@@ -7,10 +7,13 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"github.com/mattn/go-runewidth"
+	"unicode/utf8"
+
 	"github.com/mattn/go-colorable"
-	"github.com/zetamatta/go-getch"
+	"github.com/mattn/go-runewidth"
 	"github.com/zetamatta/go-box"
+	"github.com/zetamatta/go-getch"
+	"github.com/zetamatta/go-mbcs"
 )
 
 var ansiStrip = regexp.MustCompile("\x1B[^a-zA-Z]*[A-Za-z]")
@@ -24,7 +27,17 @@ func cat1(r io.Reader) bool {
 	scanner := bufio.NewScanner(r)
 	count := 0
 	for scanner.Scan() {
-		text := scanner.Text()
+		line := scanner.Bytes()
+		var text string
+		if utf8.Valid(line) {
+			text = string(line)
+		} else {
+			var err error
+			text, err = mbcs.AtoU(line)
+			if err != nil {
+				text = err.Error()
+			}
+		}
 		text = strings.Replace(text, "\xEF\xBB\xBF", "", 1)
 		width := runewidth.StringWidth(ansiStrip.ReplaceAllString(text, ""))
 		lines := (width + screenWidth) / screenWidth
