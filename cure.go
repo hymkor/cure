@@ -9,8 +9,8 @@ import (
 
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-runewidth"
+	"github.com/zetamatta/go-console/getch"
 	"github.com/zetamatta/go-console/screenbuffer"
-	"github.com/zetamatta/go-getch"
 	"github.com/zetamatta/go-texts/mbcs"
 )
 
