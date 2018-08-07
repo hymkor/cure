@@ -1,22 +1,30 @@
 @setlocal
 @set PROMPT=$G
-if not "%1" == "" goto %1
+call :"%1"
+@endlocal
+@exit /b
 
+:""
+:"build"
+    go fmt
+    for %%I in (386 amd64) do call :build %%I
+    exit /b
 :build
     setlocal
-    set GOARCH=386
-    go build
+    set "GOARCH=%1"
+    if not exist cmd mkdir cmd
+    if not exist cmd\%1 mkdir cmd\%1
+    go build -o cmd\%1\cure.exe
     endlocal
-    goto end
-:get
-    for %%I in (github.com/mattn/go-runewidth github.com/shiena/ansicolor github.com/zetamatta/nyagos/conio github.com/zetamatta/go-getch) do ( go get %%I & cd %GOPATH%\src\%%I & git pull origin master)
-    goto end
-:fmt
-    go fmt
-    goto end
-:clean
+:"get"
+    go get ./...
+    exit /b
+:"get2"
+    go get -u ./...
+    exit /b
+:"clean"
     if exist cure.exe del cure.exe
-    goto end
-:snapshot
+    exit /b
+:"snapshot"
     zip -9 cure-%DATE:/=%.zip readme.md cure.exe
-:end
+    exit /b
