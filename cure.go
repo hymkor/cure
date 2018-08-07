@@ -11,7 +11,7 @@ import (
 
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-runewidth"
-	"github.com/zetamatta/go-box"
+	"github.com/zetamatta/go-console/screenbuffer"
 	"github.com/zetamatta/go-getch"
 	"github.com/zetamatta/go-mbcs"
 )
@@ -64,7 +64,7 @@ func cat1(r io.Reader) bool {
 
 func main() {
 	count := 0
-	screenWidth, screenHeight = box.GetScreenBufferInfo().ViewSize()
+	screenWidth, screenHeight = csbi.GetConsoleScreenBufferInfo().ViewSize()
 	for _, arg1 := range os.Args[1:] {
 		if arg1 == "-b" {
 			bold = true
