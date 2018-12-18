@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"unicode/utf8"
 
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-runewidth"
@@ -22,10 +23,20 @@ var screenWidth int
 var screenHeight int
 
 func cat1(r io.Reader) bool {
-	scanner := bufio.NewScanner(mbcs.NewAutoDetectReader(r, mbcs.ConsoleCP()))
+	sc := bufio.NewScanner(r)
 	count := 0
-	for scanner.Scan() {
-		text := scanner.Text()
+	for sc.Scan() {
+		line := sc.Bytes()
+		var text string
+		if utf8.Valid(line) {
+			text = string(line)
+		} else {
+			var err error
+			text, err = mbcs.AtoU(line, mbcs.ACP)
+			if err != nil {
+				text = "ERROR: " + err.Error()
+			}
+		}
 		width := runewidth.StringWidth(ansiStrip.ReplaceAllString(text, ""))
 		lines := (width + screenWidth) / screenWidth
 		for count+lines >= screenHeight {
