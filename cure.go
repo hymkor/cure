@@ -76,10 +76,11 @@ func main() {
 			fmt.Fprintln(os.Stderr, err.Error())
 			return
 		}
-		if !cat1(r) {
+		rc := cat1(r)
+		r.Close()
+		if !rc {
 			return
 		}
-		r.Close()
 		count++
 	}
 	if count <= 0 {
