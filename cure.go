@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -17,7 +18,7 @@ import (
 var ansiStrip = regexp.MustCompile("\x1B[^a-zA-Z]*[A-Za-z]")
 var ansiOut = colorable.NewColorableStdout()
 
-var bold = false
+var bold = flag.Bool("b", false, "Use bold")
 var screenWidth int
 var screenHeight int
 
@@ -53,7 +54,7 @@ func cat1(r io.Reader, tty1 *tty.TTY) error {
 				count = 0
 			}
 		}
-		if bold {
+		if *bold {
 			fmt.Fprint(ansiOut, "\x1B[1m")
 		}
 		fmt.Fprintln(ansiOut, text)
@@ -62,7 +63,7 @@ func cat1(r io.Reader, tty1 *tty.TTY) error {
 	return nil
 }
 
-func main1() error {
+func main1(args []string) error {
 	count := 0
 	tty1, err := tty.Open()
 	if err != nil {
@@ -74,14 +75,7 @@ func main1() error {
 	if err != nil {
 		return err
 	}
-	for _, arg1 := range os.Args[1:] {
-		if arg1 == "-b" {
-			bold = true
-			continue
-		} else if arg1 == "-h" {
-			fmt.Println("CURE.exe : Color-Unicoded moRE")
-			return nil
-		}
+	for _, arg1 := range args {
 		r, err := os.Open(arg1)
 		if err != nil {
 			return err
@@ -103,7 +97,8 @@ func main1() error {
 }
 
 func main() {
-	if err := main1(); err != nil {
+	flag.Parse()
+	if err := main1(flag.Args()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
