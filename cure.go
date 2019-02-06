@@ -24,7 +24,24 @@ var bold = flag.Bool("b", false, "Use bold")
 var screenWidth int
 var screenHeight int
 
-func cat1(r io.Reader, tty1 *tty.TTY) error {
+func getkey() (rune, error) {
+	tty1, err := tty.Open()
+	if err != nil {
+		return 0, err
+	}
+	defer tty1.Close()
+	for {
+		ch, err := tty1.ReadRune()
+		if err != nil {
+			return 0, err
+		}
+		if ch != 0 {
+			return ch, nil
+		}
+	}
+}
+
+func cat1(r io.Reader) error {
 	sc := bufio.NewScanner(r)
 	count := 0
 	for sc.Scan() {
@@ -43,7 +60,7 @@ func cat1(r io.Reader, tty1 *tty.TTY) error {
 		lines := (width + screenWidth) / screenWidth
 		for count+lines >= screenHeight {
 			fmt.Fprint(os.Stderr, "more>")
-			ch, err := tty1.ReadRune()
+			ch, err := getkey()
 			if err != nil {
 				return err
 			}
@@ -71,9 +88,8 @@ func main1(args []string) error {
 	if err != nil {
 		return err
 	}
-	defer tty1.Close()
-
 	screenWidth, screenHeight, err = tty1.Size()
+	tty1.Close()
 	if err != nil {
 		return err
 	}
@@ -87,7 +103,7 @@ func main1(args []string) error {
 		if err != nil {
 			return err
 		}
-		err = cat1(r, tty1)
+		err = cat1(r)
 		r.Close()
 		if err != nil {
 			if err == io.EOF {
@@ -98,7 +114,7 @@ func main1(args []string) error {
 		count++
 	}
 	if count <= 0 {
-		cat1(os.Stdin, tty1)
+		cat1(os.Stdin)
 	}
 	return nil
 }
