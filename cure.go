@@ -5,11 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"regexp"
 	"unicode/utf8"
 
 	"github.com/mattn/go-colorable"
+	"github.com/mattn/go-isatty"
 	"github.com/mattn/go-runewidth"
 	"github.com/mattn/go-tty"
 	"github.com/zetamatta/go-texts/mbcs"
@@ -75,6 +77,11 @@ func main1(args []string) error {
 	if err != nil {
 		return err
 	}
+
+	if !isatty.IsTerminal(os.Stdout.Fd()) {
+		screenHeight = math.MaxInt32
+	}
+
 	for _, arg1 := range args {
 		r, err := os.Open(arg1)
 		if err != nil {
