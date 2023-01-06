@@ -1,4 +1,5 @@
-### CURE.exe - Color-Unicoded moRE.exe
+CURE.exe - Color-Unicoded moRE.exe
+==================================
 
 Text Viewer
 
@@ -6,18 +7,23 @@ Text Viewer
 - Support UTF8 text
 - Support ANSI Escape Sequences.
 
-## Usage
+To use, download via [Releases](https://github.com/hymkor/cure/releases)
 
-    CURE.exe [-b] {filename(s)}
-    CURE.exe -h
-    PROGRAM | CURE.exe [-b]
+Usage
+-----
 
-# Option
+```
+CURE.exe [-b] {filename(s)}
+CURE.exe -h
+PROGRAM | CURE.exe [-b]
+```
 
 * `-b` : Set bold on each line.
 * `-h` : Help
 
-## How to build
+How to build
+------------
 
-    make.cmd get
-    make.cmd
+```
+make
+```
