@@ -9,6 +9,13 @@ Text Viewer
 
 To use, download via [Releases](https://github.com/hymkor/cure/releases)
 
+Or if you can use [scoop-installer](https://scoop.sh/),
+
+```
+scoop bucket add hymkor https://github.com/hymkor/scoop-repos
+scoop install cure
+```
+
 Usage
 -----
 
