@@ -14,7 +14,8 @@ import (
 	"github.com/mattn/go-isatty"
 	"github.com/mattn/go-runewidth"
 	"github.com/mattn/go-tty"
-	"github.com/zetamatta/go-texts/mbcs"
+
+	"github.com/nyaosorg/go-windows-mbcs"
 )
 
 var ansiStrip = regexp.MustCompile("\x1B[^a-zA-Z]*[A-Za-z]")
