@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/mattn/go-colorable"
@@ -42,6 +43,37 @@ func getkey() (rune, error) {
 	}
 }
 
+func splitLinesWithWidth(text string, screenWidth int) (lines []string) {
+	var buffer strings.Builder
+	w := 0
+	ansiStrip := false
+	for _, c := range text {
+		if ansiStrip {
+			if ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') {
+				ansiStrip = false
+			}
+		} else if c == '\x1B' {
+			ansiStrip = true
+		} else {
+			w1 := runewidth.RuneWidth(c)
+			if w+w1 >= screenWidth {
+				lines = append(lines, buffer.String())
+				buffer.Reset()
+				w = 0
+			}
+			w += w1
+		}
+		buffer.WriteRune(c)
+	}
+	if buffer.Len() > 0 {
+		lines = append(lines, buffer.String())
+	}
+	if len(lines) <= 0 {
+		lines = []string{""}
+	}
+	return
+}
+
 func cat1(r io.Reader) error {
 	sc := bufio.NewScanner(r)
 	count := 0
@@ -57,28 +89,33 @@ func cat1(r io.Reader) error {
 				text = "ERROR: " + err.Error()
 			}
 		}
-		width := runewidth.StringWidth(ansiStrip.ReplaceAllString(text, ""))
-		lines := (width + screenWidth) / screenWidth
-		for count+lines >= screenHeight {
-			fmt.Fprint(os.Stderr, "more>")
-			ch, err := getkey()
-			if err != nil {
-				return err
+		lines := splitLinesWithWidth(text, screenWidth)
+		for _, line := range lines {
+			if count+1 >= screenHeight {
+				io.WriteString(os.Stderr, "more>")
+				ch, err := getkey()
+				if err != nil {
+					return err
+				}
+				if ch == '\x03' {
+					fmt.Fprintln(os.Stderr, "^C")
+					return io.EOF
+				}
+				io.WriteString(os.Stderr, "\r     \b\b\b\b\b")
+				if ch == 'q' {
+					return io.EOF
+				} else if ch == '\r' {
+					count--
+				} else {
+					count = 0
+				}
+				if *bold {
+					io.WriteString(ansiOut, "\x1B[1m")
+				}
 			}
-			fmt.Fprint(os.Stderr, "\r     \b\b\b\b\b")
-			if ch == 'q' {
-				return io.EOF
-			} else if ch == '\r' {
-				count--
-			} else {
-				count = 0
-			}
+			fmt.Fprintln(ansiOut, line)
+			count++
 		}
-		if *bold {
-			fmt.Fprint(ansiOut, "\x1B[1m")
-		}
-		fmt.Fprintln(ansiOut, text)
-		count += lines
 	}
 	return nil
 }
