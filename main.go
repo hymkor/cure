@@ -14,7 +14,6 @@ import (
 	"golang.org/x/term"
 
 	"github.com/mattn/go-colorable"
-	"github.com/mattn/go-runewidth"
 
 	"github.com/nyaosorg/go-windows-mbcs"
 )
@@ -26,7 +25,7 @@ var bold = flag.Bool("b", false, "Use bold")
 var screenWidth int
 var screenHeight int
 
-func splitLinesWithWidth(text string, screenWidth int) (lines []string) {
+func splitLinesWithWidth(text string, screenWidth int, getWidth func(rune) int) (lines []string) {
 	var buffer strings.Builder
 	w := 0
 	ansiStrip := false
@@ -38,7 +37,7 @@ func splitLinesWithWidth(text string, screenWidth int) (lines []string) {
 		} else if c == '\x1B' {
 			ansiStrip = true
 		} else {
-			w1 := runewidth.RuneWidth(c)
+			w1 := getWidth(c)
 			if w+w1 >= screenWidth {
 				lines = append(lines, buffer.String())
 				buffer.Reset()
@@ -65,6 +64,8 @@ func cat1(r io.Reader) error {
 	}
 	defer conin.Close()
 
+	getWidth := newGetWidth(true)
+
 	count := 0
 	for sc.Scan() {
 		line := sc.Bytes()
@@ -78,7 +79,7 @@ func cat1(r io.Reader) error {
 				text = "ERROR: " + err.Error()
 			}
 		}
-		lines := splitLinesWithWidth(text, screenWidth)
+		lines := splitLinesWithWidth(text, screenWidth, getWidth)
 		for _, line := range lines {
 			if count+1 >= screenHeight {
 				io.WriteString(os.Stderr, "more>")
