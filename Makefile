@@ -1,28 +1,44 @@
-NAME=$(lastword $(subst /, ,$(abspath .)))
-VERSION=$(shell git.exe describe --tags 2>nul || echo noversion)
-GOOPT=-ldflags "-s -w -X main.version=$(VERSION)"
-GOEXE=$(shell go env GOEXE)
-GOOS=$(shell go env GOOS)
-
 ifeq ($(OS),Windows_NT)
     SHELL=CMD.EXE
-    SET=SET
+    SET=set
+    DEL=del
+    NUL=nul
 else
     SET=export
+    DEL=rm
+    NUL=/dev/null
+    AWK=gawk
 endif
+
+NAME=$(notdir $(abspath .))
+VERSION=$(shell git describe --tags 2>$(NUL) || echo v0.0.0)
+GOOPT=-ldflags "-s -w -X main.version=$(VERSION)"
+EXE=$(shell go env GOEXE)
 
 all:
 	go fmt
 	$(SET) "CGO_ENABLED=0" && go build $(GOOPT)
 
+test:
+	go test -v
+
 _package:
-	go fmt
 	$(SET) "CGO_ENABLED=0" && go build $(GOOPT)
-	zip $(NAME)-$(VERSION)-$(GOOS)-$(GOARCH).zip $(NAME)$(GOEXE)
+	zip -9 $(NAME)-$(VERSION)-$(GOOS)-$(GOARCH).zip $(NAME)$(EXE)
 
 package:
-	$(SET) "GOARCH=386"   && $(MAKE) _package
-	$(SET) "GOARCH=amd64" && $(MAKE) _package
+	$(SET) "GOOS=linux" && $(SET) "GOARCH=386"   && $(MAKE) _package
+	$(SET) "GOOS=linux" && $(SET) "GOARCH=amd64" && $(MAKE) _package
+	$(SET) "GOOS=windows" && $(SET) "GOARCH=386"   && $(MAKE) _package
+	$(SET) "GOOS=windows" && $(SET) "GOARCH=amd64" && $(MAKE) _package
+
+clean:
+	$(DEL) *.zip $(NAME)$(EXE)
 
 manifest:
-	go run ./mkmanifest.go *-windows-*.zip > $(NAME).json
+	make-scoop-manifest *-windows-*.zip > $(NAME).json
+
+release:
+	gh release create -d --notes "" -t $(VERSION) $(VERSION) $(wildcard $(NAME)-$(VERSION)-*.zip)
+
+.PHONY: all test package _package clean manifest release
