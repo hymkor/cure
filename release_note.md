@@ -5,6 +5,7 @@ Apr 30, 2023
 - Fix: no lines are printed when the size of the line was too large
 - Use "golang.org/x/term"
 - Use "golang.org/x/text/width"
+- Support Linux
 
 v0.3.0
 =======
