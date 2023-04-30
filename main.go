@@ -11,10 +11,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"golang.org/x/term"
+
 	"github.com/mattn/go-colorable"
-	"github.com/mattn/go-isatty"
 	"github.com/mattn/go-runewidth"
-	"github.com/mattn/go-tty"
 
 	"github.com/nyaosorg/go-windows-mbcs"
 )
@@ -25,23 +25,6 @@ var ansiOut = colorable.NewColorableStdout()
 var bold = flag.Bool("b", false, "Use bold")
 var screenWidth int
 var screenHeight int
-
-func getkey() (rune, error) {
-	tty1, err := tty.Open()
-	if err != nil {
-		return 0, err
-	}
-	defer tty1.Close()
-	for {
-		ch, err := tty1.ReadRune()
-		if err != nil {
-			return 0, err
-		}
-		if ch != 0 {
-			return ch, nil
-		}
-	}
-}
 
 func splitLinesWithWidth(text string, screenWidth int) (lines []string) {
 	var buffer strings.Builder
@@ -76,6 +59,12 @@ func splitLinesWithWidth(text string, screenWidth int) (lines []string) {
 
 func cat1(r io.Reader) error {
 	sc := bufio.NewScanner(r)
+	conin, err := newConin()
+	if err != nil {
+		return err
+	}
+	defer conin.Close()
+
 	count := 0
 	for sc.Scan() {
 		line := sc.Bytes()
@@ -93,18 +82,18 @@ func cat1(r io.Reader) error {
 		for _, line := range lines {
 			if count+1 >= screenHeight {
 				io.WriteString(os.Stderr, "more>")
-				ch, err := getkey()
+				ch, err := conin.getkey()
 				if err != nil {
 					return err
 				}
-				if ch == '\x03' {
+				if ch == "\x03" {
 					fmt.Fprintln(os.Stderr, "^C")
 					return io.EOF
 				}
 				io.WriteString(os.Stderr, "\r     \b\b\b\b\b")
-				if ch == 'q' {
+				if ch == "q" {
 					return io.EOF
-				} else if ch == '\r' {
+				} else if ch == "\r" {
 					count--
 				} else {
 					count = 0
@@ -120,19 +109,16 @@ func cat1(r io.Reader) error {
 	return nil
 }
 
-func main1(args []string) error {
+func mains(args []string) error {
 	count := 0
-	tty1, err := tty.Open()
-	if err != nil {
-		return err
-	}
-	screenWidth, screenHeight, err = tty1.Size()
-	tty1.Close()
+
+	var err error
+	screenWidth, screenHeight, err = term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		return err
 	}
 
-	if !isatty.IsTerminal(os.Stdout.Fd()) {
+	if !term.IsTerminal(int(os.Stdout.Fd())) {
 		screenHeight = math.MaxInt32
 	}
 
@@ -159,7 +145,7 @@ func main1(args []string) error {
 
 func main() {
 	flag.Parse()
-	if err := main1(flag.Args()); err != nil {
+	if err := mains(flag.Args()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
