@@ -7,38 +7,42 @@ else
     SET=export
     DEL=rm
     NUL=/dev/null
-    AWK=gawk
 endif
 
-NAME=$(notdir $(abspath .))
+ifndef GO
+    SUPPORTGO=go1.20.14
+    GO:=$(shell $(WHICH) $(SUPPORTGO) 2>$(NUL) || echo go)
+endif
+
+NAME=$(notdir $(CURDIR))
 VERSION=$(shell git describe --tags 2>$(NUL) || echo v0.0.0)
 GOOPT=-ldflags "-s -w -X main.version=$(VERSION)"
-EXE=$(shell go env GOEXE)
+EXE=$(shell $(GO) env GOEXE)
 
 all:
-	go fmt
-	$(SET) "CGO_ENABLED=0" && go build $(GOOPT)
+	$(GO) fmt ./...
+	$(SET) "CGO_ENABLED=0" && $(GO) build $(GOOPT)
 
 test:
-	go test -v
+	$(GO) test -v ./...
 
-_package:
-	$(SET) "CGO_ENABLED=0" && go build $(GOOPT)
+_dist:
+	$(SET) "CGO_ENABLED=0" && $(GO) build $(GOOPT)
 	zip -9 $(NAME)-$(VERSION)-$(GOOS)-$(GOARCH).zip $(NAME)$(EXE)
 
-package:
-	$(SET) "GOOS=linux" && $(SET) "GOARCH=386"   && $(MAKE) _package
-	$(SET) "GOOS=linux" && $(SET) "GOARCH=amd64" && $(MAKE) _package
-	$(SET) "GOOS=windows" && $(SET) "GOARCH=386"   && $(MAKE) _package
-	$(SET) "GOOS=windows" && $(SET) "GOARCH=amd64" && $(MAKE) _package
+dist:
+	$(SET) "GOOS=linux"   && $(SET) "GOARCH=386"   && $(MAKE) _dist
+	$(SET) "GOOS=linux"   && $(SET) "GOARCH=amd64" && $(MAKE) _dist
+	$(SET) "GOOS=windows" && $(SET) "GOARCH=386"   && $(MAKE) _dist
+	$(SET) "GOOS=windows" && $(SET) "GOARCH=amd64" && $(MAKE) _dist
 
 clean:
 	$(DEL) *.zip $(NAME)$(EXE)
 
 manifest:
-	make-scoop-manifest *-windows-*.zip > $(NAME).json
+	$(GO) run github.com/hymkor/make-scoop-manifest@latest -all *-windows-*.zip > $(NAME).json
 
 release:
-	gh release create -d --notes "" -t $(VERSION) $(VERSION) $(wildcard $(NAME)-$(VERSION)-*.zip)
+	$(GO) run github.com/hymkor/latest-notes@latest | gh release create -d --notes-file - -t $(VERSION) $(VERSION) $(wildcard $(NAME)-$(VERSION)-*.zip)
 
-.PHONY: all test package _package clean manifest release
+.PHONY: all test dist _dist clean manifest release
